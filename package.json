@@ -1,0 +1,14 @@
+{
+  "name": "client_opcua_js",
+  "version": "1.0.0",
+  "description": "Client OPC UA in JS",
+  "main": "client.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Mauro Labruna, Antonino Coppolino",
+  "license": "ISC",
+  "dependencies": {
+    "node-opcua": "^2.5.12"
+  }
+}
