@@ -9,6 +9,7 @@
   "author": "Mauro Labruna, Antonino Coppolino",
   "license": "ISC",
   "dependencies": {
-    "node-opcua": "^2.5.12"
+    "node-opcua": "^2.5.12",
+    "readline-sync": "^1.4.10"
   }
 }
