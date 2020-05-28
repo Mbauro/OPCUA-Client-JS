@@ -98,9 +98,37 @@ const client = opcua.OPCUAClient.create(options)
           //console.log(dataValue.value);
           //console.log(dataValue.statusCode.description);
           
+
         }else{break;}
         
       }while(choice == "y")
+
+
+      //WRITE
+      do{
+        choice = readline.question("Do you want to write a variable? y/n");
+        if(choice == "y"){
+          var nameSpaceIndex = readline.question("Insert the namespace Index of the node that you want to read --> ");
+          var nodeId = readline.question("Insert the node ID --> ");
+          var valueToWrite = readline.question("Insert the value to write --> ")
+
+          const nodeToWrite = {
+            //type NodeIdLike = string | NodeId | number;
+            nodeId: "ns="+nameSpaceIndex+";i="+nodeId,
+            attributeId: opcua.AttributeIds.Value,
+            value:{
+              sourceTimestamp: new Date(),
+              statusCode: opcua.StatusCodes.Good,// <==== 
+              value:{
+                   dataType: opcua.DataType.Int32,
+                   value: valueToWrite
+              }
+          }
+          };
+          await session.write(nodeToWrite)
+        }
+      }while(choice=="y")
+
   
       // Create a subscription
       do{
@@ -137,7 +165,51 @@ const client = opcua.OPCUAClient.create(options)
             })
               .on("terminated", function() {console.log("terminated");
             });
+            // install monitored item
             
+            n = readline.question("Insert how many items you want to monitor");
+            var monitoredItemList = []
+            var monitor = []
+            console.log(monitoredItemList.length)
+            for(i = 0; i < n; i++){
+
+              var nameSpaceIndex = readline.question("Insert the namespace Index of the node that you want to read ");
+              var nodeId = readline.question("Insert the node ID ");
+
+              const itemToMonitor = {
+                nodeId: "ns="+nameSpaceIndex+";i="+nodeId,
+                attributeId: opcua.AttributeIds.Value
+              };
+              const parameters = {
+                samplingInterval: 5000,
+                discardOldest: true,
+                queueSize: 10
+              };
+              
+              monitoredItemList.push(itemToMonitor);
+
+              monitor[i] = opcua.ClientMonitoredItem.create(
+                subscription,
+                monitoredItemList[i],
+                parameters,
+                opcua.TimestampsToReturn.Both
+              );
+                
+              monitor[i].on("changed", (dataValue) => {
+                console.log(" value has changed : ", dataValue.value.toString());
+              });
+                
+              
+            }     
+
+            async function timeout(ms) {
+              return new Promise(resolve => setTimeout(resolve, ms));
+            }
+            await timeout(10000);
+          
+
+            console.log("now terminating subscription");
+            await subscription.terminate();
         }
 
 
