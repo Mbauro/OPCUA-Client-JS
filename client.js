@@ -3,7 +3,8 @@ var async = require("async")
 //Read from stdin
 const readline = require('readline-sync');
 
-const endpointUrl = "opc.tcp://desktop-prk86af:51210/UA/SampleServer";
+const endpointUrl = "opc.tcp://desktop-d0967du:51210/UA/SampleServer";
+
 const options = {
     clientName: "OPCUA JS Client",
     endpoint_must_exist: false
@@ -17,41 +18,74 @@ const client = opcua.OPCUAClient.create(options)
     try {
       // step 1 : connect to
       await client.connect(endpointUrl);
-      console.log("connected !");
+      console.log("Connection with server created!");
       // step 2 : createSession
       const session = await client.createSession();
-      console.log("session created !");
+      console.log("New session created!");
 
     
       // step 3 : browse
-      var folders = ["RootFolder"];
+      var folders = [];
+      var root= "RootFolder"
+      navigator=root;
+      prev = root;
       j = 0
       do{
             var choice = readline.question('Do you want to explore folders? y/n ');
+            
             if(choice == "y"){
-                var browseResult = await session.browse(folders[j]);
-                console.log("references of RootFolder :");
+                try{
+                  var browseResult = await session.browse(navigator);
+                  //console.log("TRY",browseResult);
+                }catch(err){
+                  console.log("SONO NEL CATCH");
+                  try{
+                    var browseResult = await session.browse(navigator+"Folder");
+                    console.log(err);
+                  }catch(err){
+                    console.log(navigator+"Folder non è una directory");
+                    break;
+                  }
+                    //console.log("CATCH",browseResult);
+                }
+                  console.log("references of "+navigator+":");
                 var i = 0;
                 for (const reference of browseResult.references) {
-                    i+=1;
-                    folders.push(reference.browseName.toString()+"Folder");
-                    console.log("   -> ",i, reference.browseName.toString());
+                                        
+                      folders.push(reference.browseName.toString());
+                      console.log("   -> ",i, reference.browseName.toString());
+                      i+=1;
+                }
+                if(folders.length==0){
+                  console.log("Directory vuota!")
+                }else{
                     
-                    }
-                
-                choice1 = parseInt(readline.question("Put the number of the folder that you want to explore..."));
-                console.log(folders[choice1]);
-                j+=1;
-                /*
-                console.log(folders[choice]);
-                browseResult = await session.browse(folders[choice]);
-                i = 0;
-                for (const reference of browseResult.references) {
+                direction = readline.question("Do you want return at parent directory? (y/n)");
+                if(direction=="y"){
+                  navigator=prev;
+                  folders=[];
+                }else{
+                  prev=navigator;
+                  choice1 = parseInt(readline.question("Put the number of the folder that you want to explore: "));
+                  navigator=folders[choice1];
+                  console.log("Stai scegliendo di navigare in ",navigator);
+                  //console.log("Prima ",folders);
+                  folders=[];
+                  //console.log("Dopo ",folders);
+                  //console.log(folders[choice1]);
+                  //j+=1;
+                  /*
+                  console.log(folders[choice]);
+                  browseResult = await session.browse(folders[choice]);
+                  i = 0;
+                  for (const reference of browseResult.references) {
                     folders.push(reference.browseName.toString()+"Folder");
                     console.log("   -> ",i, reference.browseName.toString());
                     i+=1;
                 }
                 */
+                }
+              }
             }
             break;
      }while(choice == "y")
