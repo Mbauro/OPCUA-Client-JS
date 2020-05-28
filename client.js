@@ -22,7 +22,7 @@ const client = opcua.OPCUAClient.create(options)
       const session = await client.createSession();
       console.log("session created !");
 
-
+    
       // step 3 : browse
       var folders = ["RootFolder"];
       j = 0
@@ -53,16 +53,33 @@ const client = opcua.OPCUAClient.create(options)
                 }
                 */
             }
+            break;
      }while(choice == "y")
     
       
-   /*
-      // step 4 : read a variable with readVariableValue
-      _"read a variable with readVariableValue"
   
-      // step 4' : read a variable with read
-      _"read a variable with read"
-  
+      //Read a variable
+      
+      do{
+        var choice = readline.question("Do you want to read? y/n ");
+        if(choice == "y"){
+          var maxAge = readline.question("Insert the max age ");
+          var nameSpaceIndex = readline.question("Insert the namespace Index of the node that you want to read ");
+          var nodeId = readline.question("Insert the node ID ");
+          const nodeToRead = {
+            //type NodeIdLike = string | NodeId | number;
+            nodeId: "ns="+nameSpaceIndex+";i="+nodeId,
+            attributeId: opcua.AttributeIds.Value
+          };
+          const dataValue = await session.read(nodeToRead, maxAge);
+          console.log(dataValue.toString());
+          //console.log(dataValue.value);
+          //console.log(dataValue.statusCode.description);
+          
+        }else{break;}
+        
+      }while(choice == "y")
+  /*
       // step 5: install a subscription and install a monitored item for 10 seconds
       _"install a subscription"
   
