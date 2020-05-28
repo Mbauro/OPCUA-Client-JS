@@ -3,7 +3,7 @@ var async = require("async")
 //Read from stdin
 const readline = require('readline-sync');
 
-const endpointUrl = "opc.tcp://desktop-d0967du:51210/UA/SampleServer";
+const endpointUrl = "opc.tcp://desktop-prk86af:51210/UA/SampleServer";
 
 const options = {
     clientName: "OPCUA JS Client",
@@ -38,10 +38,9 @@ const client = opcua.OPCUAClient.create(options)
                   var browseResult = await session.browse(navigator);
                   //console.log("TRY",browseResult);
                 }catch(err){
-                  console.log("SONO NEL CATCH");
                   try{
                     var browseResult = await session.browse(navigator+"Folder");
-                    console.log(err);
+                    
                   }catch(err){
                     console.log(navigator+"Folder non è una directory");
                     break;
@@ -72,22 +71,10 @@ const client = opcua.OPCUAClient.create(options)
                   //console.log("Prima ",folders);
                   folders=[];
                   //console.log("Dopo ",folders);
-                  //console.log(folders[choice1]);
-                  //j+=1;
-                  /*
-                  console.log(folders[choice]);
-                  browseResult = await session.browse(folders[choice]);
-                  i = 0;
-                  for (const reference of browseResult.references) {
-                    folders.push(reference.browseName.toString()+"Folder");
-                    console.log("   -> ",i, reference.browseName.toString());
-                    i+=1;
-                }
-                */
                 }
               }
             }
-            break;
+            
      }while(choice == "y")
     
       
@@ -131,18 +118,3 @@ const client = opcua.OPCUAClient.create(options)
     }
   }
   main();
-/*
-const options = {
-    clientName: "OPC_UA Client"
-}
-
-const client = opcua.OPCUAClient.create(options)
-
-const serverURL = "http://desktop-prk86af:51211/UA/SampleServer";
-
-client.connect(serverURL);
-console.log("Connected");
-
-//Create session
-const session = client.createSession();
-console.log("session created !"); */
