@@ -101,10 +101,51 @@ const client = opcua.OPCUAClient.create(options)
         }else{break;}
         
       }while(choice == "y")
-  /*
-      // step 5: install a subscription and install a monitored item for 10 seconds
-      _"install a subscription"
   
+      // Create a subscription
+      do{
+          choice = readline.question("Do you want to create a subscription? y/n ");
+          if(choice == "y"){ 
+            //Range of time in which the server check the value
+            var requestedPublishingInterval = readline.question("Insert the requested publishing interval --> ");
+            //Lifetime of the subscription. It must be multiple of the publish interval
+            var requestedLifetimeCount = readline.question("Insert the requested lifetime count --> ");
+            //If the server has no notifications pending for the period of time defined by 
+            //(MaxKeepAliveCount * PublishingInterval), the server will send a keep alive message to the client.
+            var requestedMaxKeepAliveCount = readline.question("Insert the requested Max keep alive count --> ");
+            //The maximum number of notifications that the client wishes to receive in a single publish response. 
+            var maxNotificationPerPublish = readline.question("Insert the Max notification per publish --> ");
+            //If multiple subscriptions need to send notifications to the client, 
+            //the server will send notifications to the subscription with the highest priority first. 
+            var priority = readline.question("Insert the priority --> ");
+            var publishEnable = true
+
+            var subscription = opcua.ClientSubscription.create(session,{
+              requestedPublishingInterval: requestedLifetimeCount,
+              requestedLifetimeCount: requestedLifetimeCount,
+              requestedMaxKeepAliveCount: requestedMaxKeepAliveCount,
+              maxNotificationsPerPublish: maxNotificationPerPublish,
+              publishingEnabled: publishEnable,
+              priority: priority
+
+            })
+          
+            subscription.on("started", function() {
+              console.log("subscription started for 2 seconds - subscriptionId=",subscription.subscriptionId);
+            })
+              .on("keepalive", function() {console.log("keepalive");
+            })
+              .on("terminated", function() {console.log("terminated");
+            });
+            
+        }
+
+
+      }while(choice == "y")
+      
+      
+      
+      /*
       // step 6: finding the nodeId of a node by Browse name
       _"finding the nodeId of a node by Browse name"
   
