@@ -71,6 +71,7 @@ const client = opcua.OPCUAClient.create(options)
                   //console.log("Prima ",folders);
                   folders=[];
                   //console.log("Dopo ",folders);
+                  //
                 }
               }
             }
