@@ -3,7 +3,7 @@ var async = require("async")
 //Read from stdin
 const readline = require('readline-sync');
 
-const endpointUrl = "opc.tcp://desktop-prk86af:51210/UA/SampleServer";
+const endpointUrl = "opc.tcp://desktop-d0967du:51210/UA/SampleServer";
 
 const options = {
     clientName: "OPCUA JS Client",
