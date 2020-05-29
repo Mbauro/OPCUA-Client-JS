@@ -1,6 +1,6 @@
 let opcua = require("node-opcua")
 let async = require("async")
-let sessionFile = require("./opcua-client")
+let clientJS = require("./opcua-client")
 //Read from stdin
 const readline = require('readline-sync');
 const inquirer = require("inquirer");
@@ -12,11 +12,12 @@ const options = {
     endpoint_must_exist: false
   };
 
-const client = opcua.OPCUAClient.create(options)
+const client = opcua.OPCUAClient.create(options);
+let session
 
 
+async function menu(){
 
-function menu(){
   let start = function(){
       inquirer.prompt([
       {
@@ -28,23 +29,43 @@ function menu(){
     ]).then(answer => {
       
       if(answer["start_menu"] == "Create session"){
-        let status = sessionFile.createSession(endpointUrl,client);
+        let status = clientJS.createSession(endpointUrl,client);
         status.then((value)=> {
+          session = value;
           start();
         });
       }
-      else if(answer["start_menu"] == "Read"){}
+      
+      else if(answer["start_menu"] == "Read"){
+        
+        let status = clientJS.readNode(opcua,session);
+        status.then((value)=> {
+          
+
+          start();
+        })
+      }
       else if(answer["start_menu"] == "Write"){}
-      else if(answer["start_menu"] == "Browse"){}
+      else if(answer["start_menu"] == "Browse"){
+        let status = clientJS.browse(session);
+        status.then((value) => {
+          if(value == "back"){
+            start();
+          }
+          //start();
+        })
+        //start();
+      }
       else if(answer["start_menu"] == "Make a subscription"){}
       else if(answer["start_menu"] == "Terminate program"){
         process.exit();
       }
     })
   }
-
+  await clientJS.createConnection(endpointUrl,client);
   start();
 }
+
 
 
 
@@ -264,9 +285,11 @@ function menu(){
     } catch(err) {
       console.log("An error has occured : ",err);
     }
-  }
-    menu();
-  //main();
+  } 
+   
+   //menu();
+   menu();
+
   
 
 
