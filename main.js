@@ -1,7 +1,9 @@
 let opcua = require("node-opcua")
-var async = require("async")
+let async = require("async")
+let sessionFile = require("./opcua-client")
 //Read from stdin
 const readline = require('readline-sync');
+const inquirer = require("inquirer");
 
 const endpointUrl = "opc.tcp://desktop-d0967du:51210/UA/SampleServer";
 
@@ -11,6 +13,38 @@ const options = {
   };
 
 const client = opcua.OPCUAClient.create(options)
+
+
+
+function menu(){
+  let start = function(){
+      inquirer.prompt([
+      {
+        type: "list",
+        name: "start_menu",
+        message: "What do you want to do?",
+        choices: ["Create session","Read","Write","Browse","Make a subscription","Terminate program"],
+      }
+    ]).then(answer => {
+      
+      if(answer["start_menu"] == "Create session"){
+        let status = sessionFile.createSession(endpointUrl,client);
+        status.then((value)=> {
+          start();
+        });
+      }
+      else if(answer["start_menu"] == "Read"){}
+      else if(answer["start_menu"] == "Write"){}
+      else if(answer["start_menu"] == "Browse"){}
+      else if(answer["start_menu"] == "Make a subscription"){}
+      else if(answer["start_menu"] == "Terminate program"){
+        process.exit();
+      }
+    })
+  }
+
+  start();
+}
 
 
 
@@ -231,4 +265,9 @@ const client = opcua.OPCUAClient.create(options)
       console.log("An error has occured : ",err);
     }
   }
-  main();
+    menu();
+  //main();
+  
+
+
+  
