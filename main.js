@@ -4,6 +4,9 @@ let sessionFile = require("./opcua-client")
 //Read from stdin
 const readline = require('readline-sync');
 const inquirer = require("inquirer");
+//import module from opcua-client.js
+const connection = require('./opcua-client');
+//import createSession from './opcua-client';
 
 const endpointUrl = "opc.tcp://desktop-d0967du:51210/UA/SampleServer";
 
@@ -16,7 +19,7 @@ const client = opcua.OPCUAClient.create(options)
 
 
 
-function menu(){
+async function menu(){
   let start = function(){
       inquirer.prompt([
       {
@@ -35,14 +38,17 @@ function menu(){
       }
       else if(answer["start_menu"] == "Read"){}
       else if(answer["start_menu"] == "Write"){}
-      else if(answer["start_menu"] == "Browse"){}
+      else if(answer["start_menu"] == "Browse"){
+        
+
+      }
       else if(answer["start_menu"] == "Make a subscription"){}
       else if(answer["start_menu"] == "Terminate program"){
         process.exit();
       }
     })
   }
-
+  await connection.createSession(endpointUrl,client);
   start();
 }
 
