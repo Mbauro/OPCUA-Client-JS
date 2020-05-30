@@ -1,12 +1,9 @@
 let opcua = require("node-opcua")
 let async = require("async")
-let sessionFile = require("./opcua-client")
+let clientJS = require("./opcua-client")
 //Read from stdin
 const readline = require('readline-sync');
 const inquirer = require("inquirer");
-//import module from opcua-client.js
-const connection = require('./opcua-client');
-//import createSession from './opcua-client';
 
 const endpointUrl = "opc.tcp://desktop-d0967du:51210/UA/SampleServer";
 
@@ -15,11 +12,12 @@ const options = {
     endpoint_must_exist: false
   };
 
-const client = opcua.OPCUAClient.create(options)
-
+const client = opcua.OPCUAClient.create(options);
+let session
 
 
 async function menu(){
+
   let start = function(){
       inquirer.prompt([
       {
@@ -31,16 +29,41 @@ async function menu(){
     ]).then(answer => {
       
       if(answer["start_menu"] == "Create session"){
-        let status = sessionFile.createSession(endpointUrl,client);
+        let status = clientJS.createSession(endpointUrl,client);
         status.then((value)=> {
+          session = value;
           start();
         });
       }
-      else if(answer["start_menu"] == "Read"){}
+      
+      else if(answer["start_menu"] == "Read"){
+        
+        let status = clientJS.readNode(opcua,session);
+        status.then((value)=> {
+          
+
+          start();
+        })
+      }
       else if(answer["start_menu"] == "Write"){}
       else if(answer["start_menu"] == "Browse"){
         
-
+        let tmp = function(){
+        var status = clientJS.browse(session);
+        status.then((value) => {
+          if(value == "back"){
+            start();
+          }
+          if(value == "first-level"){
+             tmp();
+          }
+          
+          
+          //start();
+        })
+        //start();
+      }
+      tmp();
       }
       else if(answer["start_menu"] == "Make a subscription"){}
       else if(answer["start_menu"] == "Terminate program"){
@@ -48,9 +71,10 @@ async function menu(){
       }
     })
   }
-  await connection.createSession(endpointUrl,client);
+  await clientJS.createConnection(endpointUrl,client);
   start();
 }
+
 
 
 
@@ -270,10 +294,7 @@ async function menu(){
     } catch(err) {
       console.log("An error has occured : ",err);
     }
-  }
-    menu();
-  //main();
-  
-
-
-  
+  } 
+   
+   //menu();
+   menu();
