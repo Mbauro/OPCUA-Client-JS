@@ -66,9 +66,6 @@ module.exports = {
         //console.log(dataValue.value);
         //console.log(dataValue.statusCode.description);
     },
-
-    browse: async function(session,x){
-    },
     
     write: async function(session,opcua){
 
@@ -213,9 +210,93 @@ module.exports = {
 
             console.log("now terminating subscription");
             await subscription[subIndex].terminate();
-    }
+    },
 
     
+
+    browse: async function(session){
+      // step 3 : browse
+      var folders = [];
+      var root= "RootFolder"
+      var path=[]
+      
+
+      var browseResult = await session.browse(root);
+      var i = 0;
+      for (const reference of browseResult.references) {
+        folders.push(reference.browseName.toString());
+        i+=1;
+      }
+      //console.log(folders);
+      folders.push("Return to principal menù");
+
+      val = inquirer.prompt([
+          {
+            type: "list",
+            name: "browse_menu",
+            message: "Select the directory in which you want to navigate",
+            choices: folders,
+          }
+      ]).then(async function parent(answer){
+          answer = answer["browse_menu"];
+          
+          if(answer == "Return to principal menù"){
+              return("back");
+          }
+          do{  
+            try{
+              path.push(answer);
+              var browseResult=await session.browse(answer);
+            }catch{
+              try{
+                var browseResult=await session.browse(answer+"Folder");
+              }catch{
+                console.log(answer+" non è una directory");
+                return "back";
+              }
+            }
+            var i = 0;
+            folders=[];
+      for (const reference of browseResult.references) {
+        folders.push(reference.browseName.toString());
+        console.log(i+" --> "+reference.browseName.toString());
+        i+=1;
+      }
+      folders.push("Return to parent directory");
+      console.log(i+" --> "+"Return to parent directory");
+      i+=1;
+      folders.push("Return to principal menù");
+      console.log(i+" --> "+"Return to principal menù");
+      try{
+        answer = (readline.question("Please, enter you choice: "));
+        //console.log("prova"+answer);
+        check=answer;
+        //console.log(check);
+        answer=folders[answer];
+        //console.log("PATH"+path);
+        //console.log("Answer "+answer);
+        
+        if(answer=="Return to parent directory"){
+         
+          if(path.length == 1){
+            return "first-level";  
+          }
+          answer=path.pop();
+          answer=path.pop();
+        }
+        
+        
+      }catch{
+        
+      }
+    }while(check!="q");      
+    
+    return "back";
+      })
+      
+      return val;
+      
+    }
 
 
 

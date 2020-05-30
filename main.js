@@ -53,15 +53,23 @@ async function menu(){
           start();
         }) 
       }
+      
       else if(answer["start_menu"] == "Browse"){
-        let status = clientJS.browse(session);
+        
+        let tmp = function(){
+        var status = clientJS.browse(session);
         status.then((value) => {
           if(value == "back"){
             start();
           }
-          //start();
+          if(value == "first-level"){
+             tmp();
+          }
+
         })
         //start();
+        }
+      tmp();
       }
       else if(answer["start_menu"] == "Make a subscription"){
         let status = clientJS.createSubscription(session,opcua);
