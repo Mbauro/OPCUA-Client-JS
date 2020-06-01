@@ -8,12 +8,12 @@ const main = require('./main')
   Defining costants  
 */
 const DEFAULT_REQUEST_PUBLISH_INTERVAL = 1000;
-const DEFAULT_PRIORITY = 0;
+const DEFAULT_PRIORITY = 1;
 const DEFAULT_REQUESTED_MAX_KEEP_ALIVE_COUNT = 5;
 const DEFAULT_REQUESTED_LIFETIME_COUNT = 40;
-const DEFAULT_MAX_NOTIFICATION_PER_PUBLISH = 0;
-const DEFAULT_PUBLISH_ENABLE = 0;
+const DEFAULT_MAX_NOTIFICATION_PER_PUBLISH = 10;
 const DEFAULT_SAMPLING_INTERVAL = 1000;
+const DEFAULT_QUEUE_SIZE = 10;
 
 module.exports = {
 
@@ -117,34 +117,43 @@ module.exports = {
         if(readline.keyInYN("Do you want to create a subscription?")){
             
                 //Range of time in which the server check the value
-                var requestedPublishingInterval = readline.questionInt("Insert the requested publishing interval --> ");
-                if(requestedPublishingInterval == 0){
-                    requestedPublishingInterval = DEFAULT_REQUEST_PUBLISH_INTERVAL;
+                var requestedPublishingInterval = readline.question("Insert the requested publishing interval (DEFAULT VALUE = "+
+                DEFAULT_REQUEST_PUBLISH_INTERVAL+") --> ");
+                
+                if(requestedPublishingInterval == ""){
+                  requestedPublishingInterval = DEFAULT_REQUEST_PUBLISH_INTERVAL;
                 }
-
+                
                 //If the server has no notifications pending for the period of time defined by 
                 //(MaxKeepAliveCount * PublishingInterval), the server will send a keep alive message to the client.
-                var requestedMaxKeepAliveCount = readline.question("Insert the requested Max keep alive count --> ");
+                var requestedMaxKeepAliveCount = readline.question("Insert the requested Max keep alive count (DEFAULT VALUE = "+
+                DEFAULT_REQUESTED_MAX_KEEP_ALIVE_COUNT+") --> ");
+                if(requestedMaxKeepAliveCount == ""){
+                  requestedMaxKeepAliveCount = DEFAULT_REQUESTED_MAX_KEEP_ALIVE_COUNT;
+                }
 
                 //Lifetime of the subscription. It must be multiple of the publish interval
-                do{
-                    var requestedLifetimeCount = readline.questionInt("Insert the requested lifetime count" + 
-                     "(it must be at least 3*requestedMaxKeepAliveCount) --> ");
-                    if(requestedLifetimeCount == 0){
+                
+                    var requestedLifetimeCount = readline.question("Insert the requested lifetime count" + 
+                     "(it must be at least 3*requestedMaxKeepAliveCount)[DEFAULT VALUE = "+
+                     DEFAULT_REQUESTED_LIFETIME_COUNT+"] --> ");
+                    if(requestedLifetimeCount == "" || requestedMaxKeepAliveCount < 3*requestedMaxKeepAliveCount){
                         requestedLifetimeCount = DEFAULT_REQUESTED_LIFETIME_COUNT;
                     }
-                }while(requestedLifetimeCount < 3*requestedMaxKeepAliveCount);
+                
 
                 
                 //The maximum number of notifications that the client wishes to receive in a single publish response. 
-                var maxNotificationPerPublish = readline.questionInt("Insert the Max notification per publish --> ");
-                if(maxNotificationPerPublish == 0){
+                var maxNotificationPerPublish = readline.question("Insert the Max notification per publish (DEFAULT VALUE = "+
+                DEFAULT_MAX_NOTIFICATION_PER_PUBLISH+") --> ");
+                if(maxNotificationPerPublish == ""){
                     maxNotificationPerPublish = DEFAULT_MAX_NOTIFICATION_PER_PUBLISH;
                 }
                 //If multiple subscriptions need to send notifications to the client, 
                 //the server will send notifications to the subscription with the highest priority first. 
-                var priority = readline.questionInt("Insert the priority --> ");
-                if(priority == 0){
+                var priority = readline.question("Insert the priority (DEFAULT VALUE = "+
+                DEFAULT_PRIORITY+") --> ");
+                if(priority == ""){
                     priority == DEFAULT_PRIORITY;
                 }
                 var publishEnable = true
@@ -183,15 +192,25 @@ module.exports = {
             for(i = 0; i < subscription.length; i++){
                 subId.push(subscription[i].subscriptionId.toString())
             }
-            let subIndex = readline.keyInSelect(subId,"Select a subscriprion ID before to continue");
+            console.log("\n*************************************************************")
+            console.log("Select the subscription from the subscription IDs shown below");
+            console.log("*************************************************************")
+            let subIndex = readline.keyInSelect(subId,"Choose a subscription id from the list");
             
 
               var nameSpaceIndex = readline.questionInt("Insert the namespace Index of the node that you want to read ");
               var nodeId = readline.questionInt("Insert the node ID ");
 
-              let samplingInterval = readline.questionInt("Insert the sampling interval"+ 
-              "(press 0 if you want default value: "+DEFAULT_SAMPLING_INTERVAL+"ms "+"---> ");
-              let queueSize = readline.questionInt("Insert the queue size ---> ");
+              let samplingInterval = readline.question("Insert the sampling interval (DEFAULT VALUE = "+
+              DEFAULT_SAMPLING_INTERVAL+") --> ");
+              if(samplingInterval == ""){
+                samplingInterval = DEFAULT_SAMPLING_INTERVAL;
+              }
+              let queueSize = readline.question("Insert the queue size (DEFAULT VALUE = "+
+              DEFAULT_QUEUE_SIZE+") --> ");
+              if(queueSize == ""){
+                queueSize = DEFAULT_QUEUE_SIZE;
+              }
 
               const itemToMonitor = {
                 nodeId: "ns="+nameSpaceIndex+";i="+nodeId,
@@ -212,7 +231,10 @@ module.exports = {
               );
                 
               monitor.on("changed", (dataValue) => {
-                console.log(" value has changed : ", dataValue.value.toString());
+                console.log("----------------------------------------------------");
+                console.log("DataType: "+opcua.DataType[dataValue.value.dataType]);
+                console.log("Value: "+ dataValue.value.value);
+                console.log("----------------------------------------------------");
               });
                 
               

@@ -5,7 +5,7 @@ let clientJS = require("./opcua-client")
 const readline = require('readline-sync');
 const inquirer = require("inquirer");
 
-const endpointUrl = "opc.tcp://desktop-d0967du:51210/UA/SampleServer";
+const endpointUrl = "opc.tcp://desktop-prk86af:51210/UA/SampleServer";
 
 const options = {
     clientName: "OPCUA JS Client",
