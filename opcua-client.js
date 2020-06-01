@@ -42,7 +42,11 @@ module.exports = {
         
         
         var test = readline.keyInPause("Press any key to continue...");
-        //console.log(test);
+        //console.log("SESSION "+session);
+        if(session==undefined){
+          console.log("You must create a session!");
+          return "back";
+        }
         var maxAge = readline.question("Insert the max age ");
         var nameSpaceIndex = readline.question("Insert the namespace Index of the node that you want to read ");
         var nodeId = readline.question("Insert the node ID ");
@@ -69,41 +73,48 @@ module.exports = {
     
     write: async function(session,opcua){
 
-        var test = readline.keyInPause("Press any key to continue...");
-        var nameSpaceIndex = readline.question("Insert the namespace Index of the node that you want to read --> ");
-        var nodeId = readline.question("Insert the node ID --> ");
-        let valueToWrite = readline.question("Insert the value to write --> ")
+      if(session==undefined){
+        console.log("You must create a session!");
+        return "back";
+      }
+      var test = readline.keyInPause("Press any key to continue...");
+      var nameSpaceIndex = readline.question("Insert the namespace Index of the node that you want to read --> ");
+      var nodeId = readline.question("Insert the node ID --> ");
+      let valueToWrite = readline.question("Insert the value to write --> ")
 
-        //Read the datatype from the node
-        const nodeToRead = {
-            //type NodeIdLike = string | NodeId | number;
-            nodeId: "ns="+nameSpaceIndex+";i="+nodeId,
-            attributeId: opcua.AttributeIds.Value
-        };
-        let maxAge = 0;
-        const dataValue = await session.read(nodeToRead, maxAge);
-        let dataType = opcua.DataType[dataValue.value.dataType];
+      //Read the datatype from the node
+      const nodeToRead = {
+          //type NodeIdLike = string | NodeId | number;
+          nodeId: "ns="+nameSpaceIndex+";i="+nodeId,
+          attributeId: opcua.AttributeIds.Value
+      };
+      let maxAge = 0;
+      const dataValue = await session.read(nodeToRead, maxAge);
+      let dataType = opcua.DataType[dataValue.value.dataType];
 
-        const nodeToWrite = {
-            //type NodeIdLike = string | NodeId | number;
-            nodeId: "ns="+nameSpaceIndex+";i="+nodeId,
-            attributeId: opcua.AttributeIds.Value,
-            value:{
-            sourceTimestamp: new Date(),
-            statusCode: opcua.StatusCodes.Good,
-            value:{
-                    dataType: dataType,
-                    value: valueToWrite
-            }
-            }
-        };
-        await session.write(nodeToWrite)
+      const nodeToWrite = {
+          //type NodeIdLike = string | NodeId | number;
+          nodeId: "ns="+nameSpaceIndex+";i="+nodeId,
+          attributeId: opcua.AttributeIds.Value,
+          value:{
+          sourceTimestamp: new Date(),
+          statusCode: opcua.StatusCodes.Good,
+          value:{
+                  dataType: dataType,
+                  value: valueToWrite
+          }
+          }
+      };
+      await session.write(nodeToWrite)
 
-    },
+  },
 
     createSubscription: async function(session,opcua){
-        
-        choice = readline.keyInYN("Do you want to create a subscription?");
+        if(session==undefined){
+          console.log("You must create a session!");
+          return "back";
+        }
+        if(readline.keyInYN("Do you want to create a subscription?")){
             
                 //Range of time in which the server check the value
                 var requestedPublishingInterval = readline.questionInt("Insert the requested publishing interval --> ");
@@ -158,10 +169,15 @@ module.exports = {
                 });
                 
                 return subscription;
-    },
+    }
+  },
 
     monitorItem: async function(opcua,subscription){
-            
+            //console.log(subscription);
+            if(subscription.length==0){
+              console.log("You don't have created any subscription, please create at least one subscription!");
+              return "back";
+            }
             var monitor;
             let subId = [];
             for(i = 0; i < subscription.length; i++){
@@ -210,6 +226,7 @@ module.exports = {
 
             console.log("now terminating subscription");
             await subscription[subIndex].terminate();
+            await subscription.pop(subIndex);
     },
 
     
@@ -220,8 +237,12 @@ module.exports = {
       var root= "RootFolder"
       var path=[]
       
-
-      var browseResult = await session.browse(root);
+      try{
+        var browseResult = await session.browse(root);
+      }catch{
+        console.error("Maybe you don't have created any session, please create a session!");
+        return "back";
+      }
       var i = 0;
       for (const reference of browseResult.references) {
         folders.push(reference.browseName.toString());

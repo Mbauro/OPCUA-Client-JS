@@ -5,7 +5,7 @@ let clientJS = require("./opcua-client")
 const readline = require('readline-sync');
 const inquirer = require("inquirer");
 
-const endpointUrl = "opc.tcp://desktop-prk86af:51210/UA/SampleServer";
+const endpointUrl = "opc.tcp://desktop-d0967du:51210/UA/SampleServer";
 
 const options = {
     clientName: "OPCUA JS Client",
@@ -74,8 +74,11 @@ async function menu(){
       else if(answer["start_menu"] == "Make a subscription"){
         let status = clientJS.createSubscription(session,opcua);
         status.then((value) =>{
-          subscription.push(value);
-          
+          if(value=="back"){
+
+          }else{
+            subscription.push(value);
+          }
           start();
         })
       }
