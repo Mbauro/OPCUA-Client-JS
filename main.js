@@ -85,7 +85,9 @@ async function menu(){
       else if(answer["start_menu"] == "Create monitored item"){
         let status = clientJS.monitorItem(opcua,subscription);
         status.then((value) =>{
-          start();
+          if(value == "back"){
+            start();
+          }
         })
       }
       else if(answer["start_menu"] == "Terminate program"){

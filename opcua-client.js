@@ -4,6 +4,8 @@ const inquirer = require("inquirer");
 const main = require('./main')
 
 
+
+
 /*
   Defining costants  
 */
@@ -14,6 +16,7 @@ const DEFAULT_REQUESTED_LIFETIME_COUNT = 40;
 const DEFAULT_MAX_NOTIFICATION_PER_PUBLISH = 10;
 const DEFAULT_SAMPLING_INTERVAL = 1000;
 const DEFAULT_QUEUE_SIZE = 10;
+
 
 module.exports = {
 
@@ -183,11 +186,17 @@ module.exports = {
 
     monitorItem: async function(opcua,subscription){
             //console.log(subscription);
+
+            
+
+            var exit = 0;
+            let timeout;
+            
             if(subscription.length==0){
               console.log("You don't have created any subscription, please create at least one subscription!");
               return "back";
             }
-            var monitor;
+            //var monitor;
             let subId = [];
             for(i = 0; i < subscription.length; i++){
                 subId.push(subscription[i].subscriptionId.toString())
@@ -197,6 +206,9 @@ module.exports = {
             console.log("*************************************************************")
             let subIndex = readline.keyInSelect(subId,"Choose a subscription id from the list");
             
+            if(subIndex == -1){
+              return "back";
+            }
 
               var nameSpaceIndex = readline.questionInt("Insert the namespace Index of the node that you want to read ");
               var nodeId = readline.questionInt("Insert the node ID ");
@@ -229,26 +241,34 @@ module.exports = {
                 parameters,
                 opcua.TimestampsToReturn.Both
               );
-                
+            
+
+
               monitor.on("changed", (dataValue) => {
                 console.log("----------------------------------------------------");
                 console.log("DataType: "+opcua.DataType[dataValue.value.dataType]);
-                console.log("Value: "+ dataValue.value.value);
-                console.log("----------------------------------------------------");
+                console.log("Value: "+ dataValue.value.value);             
               });
-                
+            
+            
+
+             return new Promise(resolve =>{
+              
+              timeout = setTimeout(() => {
+                monitor.terminate();
+                resolve("back")
+              }, 10000);
+              
+            }); 
               
             
 
-            async function timeout(ms) {
-              return new Promise(resolve => setTimeout(resolve, ms));
-            }
-            await timeout(10000);
+            //return "back";
           
 
-            console.log("now terminating subscription");
-            await subscription[subIndex].terminate();
-            await subscription.pop(subIndex);
+
+
+            
     },
 
     
