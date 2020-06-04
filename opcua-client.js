@@ -172,8 +172,32 @@ module.exports = {
     }
   },
 
+  deleteSub: async function(subscription){
+    if(subscription.length==0){
+      console.log("No subsricption founded");
+      return "back";
+    }else{
+      let subId = [];
+      for(i = 0; i < subscription.length; i++){
+        subId.unshift(subscription[i].subscriptionId.toString());
+      }
+      let subIndex = readline.keyInSelect(subId,"Select a subscriprion that you want to delete");
+      //subIndex+=1;
+      console.log("SUB",subIndex);
+      console.log(subId);
+      if(subIndex==-1){
+        console.log("Back to menu........");
+        return "back";
+      }else{
+        return subIndex;
+      }
+
+    }
+  },
+
     monitorItem: async function(opcua,subscription){
-            //console.log(subscription);
+      var time;
+      //console.log(subscription);
             if(subscription.length==0){
               console.log("You don't have created any subscription, please create at least one subscription!");
               return "back";
@@ -184,6 +208,11 @@ module.exports = {
                 subId.push(subscription[i].subscriptionId.toString())
             }
             let subIndex = readline.keyInSelect(subId,"Select a subscriprion ID before to continue");
+            //subIndex+=1;
+            /*if(subIndex==0){
+              console.log("Back to menu........");
+              return "back";
+            }*/
             
 
               var nameSpaceIndex = readline.questionInt("Insert the namespace Index of the node that you want to read ");
@@ -192,7 +221,7 @@ module.exports = {
               let samplingInterval = readline.questionInt("Insert the sampling interval"+ 
               "(press 0 if you want default value: "+DEFAULT_SAMPLING_INTERVAL+"ms "+"---> ");
               let queueSize = readline.questionInt("Insert the queue size ---> ");
-
+              
               const itemToMonitor = {
                 nodeId: "ns="+nameSpaceIndex+";i="+nodeId,
                 attributeId: opcua.AttributeIds.Value
@@ -211,22 +240,63 @@ module.exports = {
                 opcua.TimestampsToReturn.Both
               );
                 
-              monitor.on("changed", (dataValue) => {
-                console.log(" value has changed : ", dataValue.value.toString());
-              });
-                
               
+                monitor.on("changed", (dataValue) => {
+                  console.log(" value has changed : ", dataValue.value.toString());
+                  
+                });
+                
             
+                let loop_is_stopped = false
+                let sending_loop = null
+                
+                function sendRequest() {
+                  monitor.on("changed", (dataValue) => {
+                  console.log(" value has changed : ", dataValue.value.toString());
+                    
+                  });
+                  
+                    // following lines are scheduled after the request promise is resolved
+                    if (loop_is_stopped) {
+                        return
+                    }
+                    // do something with the response
+                }
+                
+                function start() {
+                    sending_loop = setInterval(sendRequest, 10000)
+                }
+                
+                function stop() {
+                  loop_is_stopped = true
+                  clearInterval(sending_loop)
+              }
 
+              start();
+              
+              process.stdin.on('keypress', function() {
+                
+                  console.log('Attendi...sto tornando al menù...');
+                  monitor.terminate();
+                  stop();
+                  return "back";
+                  
+                
+                
+              });
+
+
+            
+            
             async function timeout(ms) {
               return new Promise(resolve => setTimeout(resolve, ms));
             }
-            await timeout(10000);
+            
+           
+          
+            return "back";
           
 
-            console.log("now terminating subscription");
-            await subscription[subIndex].terminate();
-            await subscription.pop(subIndex);
     },
 
     
