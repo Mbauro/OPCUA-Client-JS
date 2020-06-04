@@ -184,14 +184,33 @@ module.exports = {
     }
   },
 
+  deleteSub: async function(subscription){
+    if(subscription.length==0){
+      console.log("No subsricption founded");
+      return "back";
+    }else{
+      let subId = [];
+      for(i = 0; i < subscription.length; i++){
+        subId.unshift(subscription[i].subscriptionId.toString());
+      }
+      let subIndex = readline.keyInSelect(subId,"Select a subscriprion that you want to delete");
+      //subIndex+=1;
+      console.log("SUB",subIndex);
+      console.log(subId);
+      if(subIndex==-1){
+        console.log("Back to menu........");
+        return "back";
+      }else{
+        return subIndex;
+      }
+
+    }
+  },
+
     monitorItem: async function(opcua,subscription){
-            //console.log(subscription);
 
-            
-
-            var exit = 0;
-            let timeout;
-            
+      
+      //console.log(subscription);
             if(subscription.length==0){
               console.log("You don't have created any subscription, please create at least one subscription!");
               return "back";
@@ -241,34 +260,52 @@ module.exports = {
                 parameters,
                 opcua.TimestampsToReturn.Both
               );
-            
+                
+              
+                monitor.on("changed", (dataValue) => {
+                  console.log("----------------------------------------------------");
+                  console.log("DataType: "+opcua.DataType[dataValue.value.dataType]);
+                  console.log("Value: "+ dataValue.value.value);  
+                  
+                });
+                
+              
+              
+                    
+           
+          
+              return new Promise(resolve =>{
+                var stdin = process.stdin;
 
-
-              monitor.on("changed", (dataValue) => {
-                console.log("----------------------------------------------------");
-                console.log("DataType: "+opcua.DataType[dataValue.value.dataType]);
-                console.log("Value: "+ dataValue.value.value);             
+                // without this, we would only get streams once enter is pressed
+                stdin.setRawMode( true );
+                
+                // resume stdin in the parent process (node app won't quit all by itself
+                // unless an error or process.exit() happens)
+                stdin.resume();
+                
+                // i don't want binary, do you?
+                stdin.setEncoding( 'utf8' );
+                
+                // on any data into stdin
+                stdin.on( 'data', function( key ){
+                  // ctrl-c ( end of text )
+                  if (key === '\u0003') {
+                    console.log("Terminating...");
+                    monitor.terminate();
+                    timeout = setTimeout(() => {
+                      
+                      resolve("back")
+                    }, 3000);
+                  }
+                  // write the key to stdout all normal like
+                  process.stdout.write( key );
+                });
+                
+                
               });
-            
-            
-
-             return new Promise(resolve =>{
-              
-              timeout = setTimeout(() => {
-                monitor.terminate();
-                resolve("back")
-              }, 10000);
-              
-            }); 
-              
-            
-
-            //return "back";
           
 
-
-
-            
     },
 
     

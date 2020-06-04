@@ -25,7 +25,8 @@ async function menu(){
         type: "list",
         name: "start_menu",
         message: "What do you want to do?",
-        choices: ["Create session","Read","Write","Browse","Make a subscription","Create monitored item","Terminate program"],
+        choices: ["Create session","Read","Write","Browse","Make a subscription","Delete an existing subscription",
+        "Create monitored item","Terminate program"],
       }
     ]).then(answer => {
 
@@ -51,6 +52,20 @@ async function menu(){
         let status = clientJS.write(session,opcua);
         status.then((value) =>{
           start();
+        }) 
+      }
+
+      else if(answer["start_menu"] == "Delete an existing subscription"){
+        let status = clientJS.deleteSub(subscription);
+        status.then((value) =>{
+          if(value=="back"){
+            start();
+          }else{
+            console.log("BEFORE",subscription);
+            subscription.pop(value);
+            console.log("AFTER",subscription);
+            start();
+          }
         }) 
       }
       
