@@ -5,12 +5,15 @@ let clientJS = require("./opcua-client")
 const readline = require('readline-sync');
 const inquirer = require("inquirer");
 
-const endpointUrl = "opc.tcp://desktop-prk86af:51210/UA/SampleServer";
+let endpointUrl = null;
 
 const options = {
     clientName: "OPCUA JS Client",
-    endpoint_must_exist: false
-  };
+    endpoint_must_exist: false,
+    connectionStrategy: {
+      maxRetry: 1
+      }
+    };
 
 const client = opcua.OPCUAClient.create(options);
 let session;
@@ -18,6 +21,19 @@ let subscription = [];
 
 
 async function menu(){
+
+  if(endpointUrl == null){
+    //endpointUrl = readline.question("Insert the Server URL that you want to connect --> ");
+    
+    let check = 0; 
+    do{
+      endpointUrl = readline.question("Insert the Server URL that you want to connect --> ");
+      check = await clientJS.createConnection(endpointUrl,client);
+    }while(check == 0);
+    
+    start();
+}
+  }
 
   let start = function(){
       inquirer.prompt([
@@ -110,9 +126,7 @@ async function menu(){
       }
     })
   }
-  await clientJS.createConnection(endpointUrl,client);
-  start();
-}
+  
    
    //menu();
    menu();

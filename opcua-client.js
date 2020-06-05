@@ -25,9 +25,16 @@ module.exports = {
             // step 1 : connect to
             await client.connect(endpointUrl);
             console.log("Connection with server created!");
+            return 1;
+
+            
         } catch (error) {
-            console.log("An error has occurred: ",error);
+            console.log("Error: The connection cannot be established with server "+endpointUrl);
+            console.log("Please try again...");
+            return 0;
         }
+
+        
     },
 
     createSession: async function(endpointUrl,client){
@@ -283,8 +290,7 @@ module.exports = {
                 // resume stdin in the parent process (node app won't quit all by itself
                 // unless an error or process.exit() happens)
                 stdin.resume();
-                
-                // i don't want binary, do you?
+              
                 stdin.setEncoding( 'utf8' );
                 
                 // on any data into stdin
@@ -296,7 +302,7 @@ module.exports = {
                     timeout = setTimeout(() => {
                       
                       resolve("back")
-                    }, 3000);
+                    }, 1000);
                   }
                   // write the key to stdout all normal like
                   process.stdout.write( key );
