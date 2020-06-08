@@ -29,10 +29,11 @@ async function menu(){
     do{
       endpointUrl = readline.question("Insert the Server URL that you want to connect --> ");
       check = await clientJS.createConnection(endpointUrl,client);
+
     }while(check == 0);
     
     start();
-}
+  }
   }
 
   let start = function(){
@@ -88,7 +89,7 @@ async function menu(){
       else if(answer["start_menu"] == "Browse"){
         
         let tmp = function(){
-        var status = clientJS.browse(session);
+        var status = clientJS.browse(opcua,session);
         status.then((value) => {
           if(value == "back"){
             start();

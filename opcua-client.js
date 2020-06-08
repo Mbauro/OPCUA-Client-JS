@@ -21,6 +21,7 @@ const DEFAULT_QUEUE_SIZE = 10;
 module.exports = {
 
     createConnection: async function(endpointUrl,client){
+      console.log("URL "+endpointUrl);
         try {
             // step 1 : connect to
             await client.connect(endpointUrl);
@@ -29,6 +30,7 @@ module.exports = {
 
             
         } catch (error) {
+            await client.disconnect();
             console.log("Error: The connection cannot be established with server "+endpointUrl);
             console.log("Please try again...");
             return 0;
@@ -316,7 +318,7 @@ module.exports = {
 
     
 
-    browse: async function(session){
+    browse: async function(opcua,session){
       // step 3 : browse
       var folders = [];
       var root= "RootFolder"
@@ -334,7 +336,9 @@ module.exports = {
         i+=1;
       }
       //console.log(folders);
+      folders.push("Insert the Node ID manually");
       folders.push("Return to principal menù");
+
 
       val = inquirer.prompt([
           {
@@ -349,6 +353,28 @@ module.exports = {
           if(answer == "Return to principal menù"){
               return("back");
           }
+          else if(answer=="Insert the Node ID manually"){
+            readline.keyInPause("Press any key to continue...");
+            nameSpaceIndex = readline.question("Insert the namespace Index --> ");
+            nodeId = readline.question("Insert the node id --> ");
+            try{
+              var browseResult= await session.browse(opcua.makeNodeId(parseInt(nodeId),parseInt(nameSpaceIndex)));
+              for (const reference of browseResult.references) {
+                folders.push(reference.browseName.toString());
+                console.log("--------------------------------------------");
+                console.log("Namespace Index: "+reference.nodeId["namespace"]);
+                console.log("Node ID: "+(reference.nodeId["value"]));
+                console.log("Browse Name: "+reference.browseName.toString());
+                console.log("Display Name: "+reference.displayName["text"].toString());
+                console.log("Node Class: "+opcua.NodeClass[reference.nodeClass]);
+                console.log("--------------------------------------------");
+              }
+            }catch(err){
+              console.log(err);
+            }
+            return("first-level");
+          }
+          else{
           do{  
             try{
               path.push(answer);
@@ -361,11 +387,19 @@ module.exports = {
                 return "back";
               }
             }
+            
             var i = 0;
             folders=[];
       for (const reference of browseResult.references) {
         folders.push(reference.browseName.toString());
-        console.log(i+" --> "+reference.browseName.toString());
+        console.log("--------------------------------------------");
+        console.log("Namespace Index: "+reference.nodeId["namespace"]);
+        console.log("Node ID: "+(reference.nodeId["value"]));
+        console.log("Browse Name: "+reference.browseName.toString());
+        console.log("Display Name: "+reference.displayName["text"].toString());
+        console.log("Node Class: "+opcua.NodeClass[reference.nodeClass]);
+        console.log("--------------------------------------------");
+        
         i+=1;
       }
       folders.push("Return to parent directory");
@@ -392,11 +426,12 @@ module.exports = {
         }
         
         
+        
       }catch{
         
       }
     }while(check!="q");      
-    
+  }
     return "back";
       })
       
