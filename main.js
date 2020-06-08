@@ -38,6 +38,7 @@ async function menu() {
 }
 
 let start = function () {
+  
   inquirer.prompt([
     {
       type: "list",
@@ -85,9 +86,9 @@ let start = function () {
         if (value == "back") {
           start();
         } else {
-          console.log("BEFORE", subscription);
+          
           subscription.pop(value);
-          console.log("AFTER", subscription);
+          
           start();
         }
       })
@@ -135,8 +136,6 @@ let start = function () {
   })
 }
 
-
-//menu();
 menu();
 
 

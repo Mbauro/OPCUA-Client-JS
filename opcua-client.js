@@ -205,8 +205,7 @@ module.exports = {
       }
       let subIndex = readline.keyInSelect(subId, "Select a subscriprion that you want to delete");
       //subIndex+=1;
-      console.log("SUB", subIndex);
-      console.log(subId);
+      
       if (subIndex == -1) {
         console.log("Back to menu........");
         return "back";
@@ -219,7 +218,7 @@ module.exports = {
 
   monitorItem: async function (opcua, subscription) {
 
-
+    
     //console.log(subscription);
     if (subscription.length == 0) {
       console.log("You don't have created any subscription, please create at least one subscription!");
@@ -300,15 +299,21 @@ module.exports = {
       stdin.on('data', function (key) {
         // ctrl-c ( end of text )
         if (key === '\u0003') {
-          console.log("Terminating...");
+
+          process.stdout.clearLine();
+          process.stdout.write("Terminating...");
+          process.stdout.cursorTo(0);
+
           monitor.terminate();
           timeout = setTimeout(() => {
-
+            
+            console.clear();        
             resolve("back")
+
           }, 1000);
         }
         // write the key to stdout all normal like
-        process.stdout.write(key);
+        //process.stdout.write(key);
       });
 
 
