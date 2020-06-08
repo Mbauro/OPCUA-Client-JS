@@ -1,4 +1,4 @@
-##To initialize the project
-'''
+## To initialize the project
+```
 npm install 
-'''
+```
