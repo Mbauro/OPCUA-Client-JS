@@ -1,1 +1,4 @@
-npm install to inizialize the project
+##To initialize the project
+'''
+npm install 
+'''
