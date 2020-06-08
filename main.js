@@ -18,6 +18,7 @@ const options = {
 const client = opcua.OPCUAClient.create(options);
 let session;
 let subscription = [];
+let check_session=0;
 
 
 async function menu(){
@@ -49,13 +50,18 @@ async function menu(){
 
 
       if(answer["start_menu"] == "Create session"){
-        let status = clientJS.createSession(endpointUrl,client);
-        status.then((value)=> {
-          session = value;
+        check_session+=1;
+        if(check_session==1){
+          let status = clientJS.createSession(endpointUrl,client);
+          status.then((value)=> {
+            session = value;
+            start();
+          });
+        }else{
+          console.log("Session has been already created!!!!");
           start();
-        });
+        }
       }
-      
       else if(answer["start_menu"] == "Read"){
         
         let status = clientJS.readNode(opcua,session);
