@@ -4,8 +4,8 @@ let clientJS = require("./opcua-client")
 //Read from stdin
 const readline = require('readline-sync');
 const inquirer = require("inquirer");
-
 let endpointUrl = null;
+
 
 const options = {
   clientName: "OPCUA JS Client",
@@ -20,7 +20,7 @@ let session;
 let subscription = [];
 let check_session=0;
 
-
+let new_client = null;
 async function menu() {
 
   if (endpointUrl == null) {
@@ -30,9 +30,32 @@ async function menu() {
     do {
       endpointUrl = readline.question("Insert the Server URL that you want to connect --> ");
       check = await clientJS.createConnection(endpointUrl, client);
+    }while (check == 0);
+      choosen_endpoint = await clientJS.discoveryEndpoint(endpointUrl,client,opcua);
+      await client.disconnect();
+      console.log("Security mode: "+choosen_endpoint.securityMode);
+      console.log("Policy: "+[choosen_endpoint.securityPolicyUri]);
+      new_client = opcua.OPCUAClient.create({
+        clientName: "OPCUAL JS Client",
+        endpoint_must_exist: false,
+        securityPolicy:choosen_endpoint.securityPolicyUri,
+        securityMode:choosen_endpoint.securityMode,
+        
+        connectionStrategy: {
 
-    } while (check == 0);
-
+          maxRetry: 1
+        }
+      })
+      check=0;
+      check=await clientJS.createConnection(choosen_endpoint.endpointUrl, new_client);
+      while(check==0){
+        console.log("Please, select a supported endpoint: ");
+        await clientJS.createConnection(endpointUrl, client);
+        choosen_endpoint = await clientJS.discoveryEndpoint(endpointUrl,client,opcua);
+        check=await clientJS.createConnection(choosen_endpoint.endpointUrl, new_client);
+      }
+    
+    
     start();
   }
 }
@@ -53,7 +76,7 @@ let start = function () {
     if (answer["start_menu"] == "Create session") {
       check_session+=1;
       if(check_session==1){
-        let status = clientJS.createSession(endpointUrl, client);
+        let status = clientJS.createSession(choosen_endpoint, new_client);
         status.then((value) => {
           session = value;
           start();

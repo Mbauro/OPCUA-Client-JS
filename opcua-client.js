@@ -20,6 +20,31 @@ const DEFAULT_QUEUE_SIZE = 10;
 
 module.exports = {
 
+  discoveryEndpoint: async function(url,client,opcua){
+    endpoint= await client.getEndpoints({endpointUrl:url});
+    //console.log("PROVA: "+endpoint);
+    console.log("***********************************************");
+    console.log("Endpoint list");
+    console.log("***********************************************");
+    var endpoint_choice;
+    for (i = 0; i < endpoint.length; i++) {
+      console.log("------------------------------------------------");
+      console.log('\x1b[33m%s\x1b[0m',"Endpoint number "+i+":");
+      console.log('\x1b[36m%s\x1b[0m',"Endpoint url: ","\x1b[0m"+endpoint[i].endpointUrl);
+      console.log('\x1b[36m%s\x1b[0m',"Security mode: ","\x1b[0m"+opcua.MessageSecurityMode[endpoint[i].securityMode]);
+      console.log('\x1b[36m%s\x1b[0m',"Security policy: ","\x1b[0m"+endpoint[i].securityPolicyUri);
+      console.log('\x1b[36m%s\x1b[0m',"Transport protocol: ","\x1b[0m"+endpoint[i].transportProfileUri);
+      console.log('\x1b[36m%s\x1b[0m',"Security level: ","\x1b[0m"+endpoint[i].securityLevel+"\x1b[0m");
+      
+    }
+    do{
+      endpoint_choice=parseInt(readline.question("Select the number of the endpoint that you want to choose: "));
+    }while(endpoint_choice>=endpoint.length)
+    
+    
+    return endpoint[endpoint_choice];
+  },
+
   createConnection: async function (endpointUrl, client) {
     console.log("URL " + endpointUrl);
     try {
@@ -31,7 +56,8 @@ module.exports = {
 
     } catch (error) {
       await client.disconnect();
-      console.log("Error: The connection cannot be established with server " + endpointUrl);
+      console.log("\x1b[31m",""+error,"\x1b[0m");
+      //console.log("Error: The connection cannot be established with server " + endpointUrl);
       console.log("Please try again...");
       return 0;
     }
