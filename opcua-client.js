@@ -22,7 +22,10 @@ module.exports = {
 
   discoveryEndpoint: async function(url,client,opcua){
     endpoint= await client.getEndpoints({endpointUrl:url});
-    //console.log("PROVA: "+endpoint);
+    var dynamic_url= url.substring(url.indexOf("//")+2);
+    dynamic_url=dynamic_url.substring(0,dynamic_url.indexOf(":"));
+    
+    console.log("PROVA: "+dynamic_url);
     console.log("***********************************************");
     console.log("Endpoint list");
     console.log("***********************************************");
@@ -30,6 +33,7 @@ module.exports = {
     for (i = 0; i < endpoint.length; i++) {
       console.log("------------------------------------------------");
       console.log('\x1b[33m%s\x1b[0m',"Endpoint number "+i+":");
+      endpoint[i].endpointUrl=endpoint[i].endpointUrl.replace("localhost",dynamic_url)
       console.log('\x1b[36m%s\x1b[0m',"Endpoint url: ","\x1b[0m"+endpoint[i].endpointUrl);
       console.log('\x1b[36m%s\x1b[0m',"Security mode: ","\x1b[0m"+opcua.MessageSecurityMode[endpoint[i].securityMode]);
       console.log('\x1b[36m%s\x1b[0m',"Security policy: ","\x1b[0m"+endpoint[i].securityPolicyUri);
