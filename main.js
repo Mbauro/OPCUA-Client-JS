@@ -67,7 +67,7 @@ let start = function () {
       type: "list",
       name: "start_menu",
       message: "What do you want to do?",
-      choices: ["Create session", "Read", "Write", "Browse", "Make a subscription", "Delete an existing subscription",
+      choices: ["Create session", "Read", "Write", "Browse", "Create a subscription", "Delete an existing subscription",
         "Create monitored item", "Terminate program"],
     }
   ]).then(answer => {
@@ -134,7 +134,7 @@ let start = function () {
       }
       tmp();
     }
-    else if (answer["start_menu"] == "Make a subscription") {
+    else if (answer["start_menu"] == "Create a subscription") {
       let status = clientJS.createSubscription(session, opcua);
       status.then((value) => {
         if (value == "back") {
